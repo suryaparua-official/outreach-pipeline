@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  pipeline:
+    build: .
+    environment:
+      - OCEAN_API_KEY=${OCEAN_API_KEY}
+      - PROSPEO_API_KEY=${PROSPEO_API_KEY}
+      - EAZYREACH_API_KEY=${EAZYREACH_API_KEY}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+    stdin_open: true
+    tty: true
