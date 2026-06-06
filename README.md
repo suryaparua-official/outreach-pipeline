@@ -76,7 +76,7 @@ Required environment variables:
 Run the application directly with:
 
 ```bash
-npm run dev
+npm start <domain>
 ```
 
 ### Build
@@ -99,7 +99,7 @@ docker run -it --env-file .env outreach-pipeline npm start vocallabs.ai
 Or use Docker Compose:
 
 ```bash
-docker compose up --build
+docker compose run pipeline npm start vocallabs.ai
 ```
 
 ## Safety Checkpoint
