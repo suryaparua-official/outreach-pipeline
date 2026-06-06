@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Contact } from "../types.ts";
+import { Contact } from "../types";
 import { logger } from "../utils/logger";
 
 const BASE_URL = "https://api.brevo.com/v3";

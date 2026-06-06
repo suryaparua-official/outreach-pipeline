@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import { Contact } from "../types.ts";
+import { Contact } from "../types";
 import { logger } from "./logger";
 
 export async function confirmBeforeSend(contacts: Contact[]): Promise<boolean> {

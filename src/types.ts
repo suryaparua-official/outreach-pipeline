@@ -9,6 +9,7 @@ export interface DecisionMaker {
   title: string;
   linkedinUrl: string;
   companyDomain: string;
+  personId?: string;
 }
 
 export interface Contact {
@@ -19,11 +20,9 @@ export interface Contact {
   companyDomain: string;
 }
 
-export interface DecisionMaker {
-  firstName: string;
-  lastName: string;
-  title: string;
-  linkedinUrl: string;
-  companyDomain: string;
-  personId?: string;
+export interface PipelineResult {
+  companies: Company[];
+  decisionMakers: DecisionMaker[];
+  contacts: Contact[];
+  emailsSent: number;
 }
