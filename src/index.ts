@@ -8,12 +8,62 @@ import { sendOutreachEmails } from "./stages/brevo";
 import { confirmBeforeSend } from "./utils/checkpoint";
 import { logger } from "./utils/logger";
 
-async function run() {
-  const seedDomain = process.argv[2];
+function validateEnv() {
+  const requiredKeys = [
+    "OCEAN_API_KEY",
+    "PROSPEO_API_KEY",
+    "EAZYREACH_CLIENT_ID",
+    "EAZYREACH_CLIENT_SECRET",
+    "BREVO_API_KEY",
+    "SENDER_EMAIL",
+  ];
 
-  if (!seedDomain) {
+  const missingKeys = requiredKeys.filter((key) => !process.env[key]);
+  if (missingKeys.length > 0) {
+    missingKeys.forEach((key) =>
+      logger.error(`Missing required env var: ${key}`),
+    );
+    process.exit(1);
+  }
+}
+
+function cleanDomain(domain: string): string {
+  const trimmed = domain.trim();
+  if (trimmed.toLowerCase().startsWith("http://")) {
+    throw new Error("Invalid domain: do not include http://");
+  }
+
+  let cleaned = trimmed.toLowerCase();
+  if (cleaned.startsWith("https://")) {
+    cleaned = cleaned.slice("https://".length);
+  }
+  cleaned = cleaned.replace(/\/+$/, "");
+  return cleaned;
+}
+
+async function run() {
+  const startTime = Date.now();
+  validateEnv();
+
+  const rawSeedDomain = process.argv[2];
+  if (!rawSeedDomain) {
     logger.error("Usage: npm start <domain>");
     logger.error("Example: npm start vocallabs.ai");
+    process.exit(1);
+  }
+
+  let seedDomain: string;
+  try {
+    seedDomain = cleanDomain(rawSeedDomain);
+  } catch (error: any) {
+    logger.error(error.message);
+    process.exit(1);
+  }
+
+  if (!seedDomain.includes(".")) {
+    logger.error(
+      "Invalid domain: please provide a domain name without protocol.",
+    );
     process.exit(1);
   }
 
@@ -53,13 +103,17 @@ async function run() {
   // Stage 4
   const sent = await sendOutreachEmails(contacts);
 
-  console.log("\n" + "=".repeat(50));
-  logger.success(`Pipeline complete!`);
-  logger.success(`Companies found: ${companies.length}`);
-  logger.success(`Decision makers found: ${decisionMakers.length}`);
-  logger.success(`Verified contacts: ${contacts.length}`);
-  logger.success(`Emails sent: ${sent}`);
-  console.log("=".repeat(50) + "\n");
+  const executionTime = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  console.log("\n===== PIPELINE SUMMARY =====");
+  console.log(`Companies Found: ${companies.length}`);
+  console.log(`Decision Makers: ${decisionMakers.length}`);
+  console.log(`Verified Contacts: ${contacts.length}`);
+  console.log(`Emails Sent: ${sent}`);
+  console.log(`Execution Time: ${executionTime}s`);
+  console.log(`Status: SUCCESS`);
+  console.log("=============================");
+  console.log();
 }
 
 run().catch((err) => {

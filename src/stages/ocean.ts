@@ -28,12 +28,18 @@ export async function findLookalikeCompanies(
         },
       );
 
-      const companies: Company[] = (response.data.companies || []).map(
-        (c: any) => ({
-          domain: c.domain || c.company?.domain,
-          name: c.name || c.company?.name,
-        }),
-      );
+      const companies: Company[] = [];
+      (response.data.companies || []).forEach((c: any) => {
+        const domain = c.domain || c.company?.domain;
+        const name = c.name || c.company?.name;
+        if (!domain) {
+          return;
+        }
+        if (companies.some((existing) => existing.domain === domain)) {
+          return;
+        }
+        companies.push({ domain, name });
+      });
 
       logger.success(`Found ${companies.length} lookalike companies`);
       companies.forEach((c) => logger.dim(`  → ${c.domain}`));
