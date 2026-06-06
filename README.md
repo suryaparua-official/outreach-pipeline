@@ -27,6 +27,8 @@ vocallabs.ai → Ocean.io (10 lookalike companies) → Prospeo (C-suite + Linked
 
 ## Architecture
 
+<img width="1520" height="889" alt="outreach_pipeline_architecture" src="https://github.com/user-attachments/assets/f83b42e5-282d-47da-b795-d51853b45f35" />
+
 The pipeline runs four stages sequentially:
 
 - Stage 1 — Ocean.io finds lookalike companies from the seed domain
