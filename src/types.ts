@@ -19,9 +19,11 @@ export interface Contact {
   companyDomain: string;
 }
 
-export interface PipelineResult {
-  companies: Company[];
-  decisionMakers: DecisionMaker[];
-  contacts: Contact[];
-  emailsSent: number;
+export interface DecisionMaker {
+  firstName: string;
+  lastName: string;
+  title: string;
+  linkedinUrl: string;
+  companyDomain: string;
+  personId?: string;
 }

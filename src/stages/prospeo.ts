@@ -1,64 +1,106 @@
 import axios from "axios";
-import { Company, DecisionMaker } from "../types.ts";
+import { DecisionMaker, Contact } from "../types";
 import { logger } from "../utils/logger";
 
-const BASE_URL = "https://api.prospeo.io";
+const BASE_URL = "https://api.superflow.run/b2b";
 
-export async function findDecisionMakers(
-  companies: Company[],
-): Promise<DecisionMaker[]> {
-  logger.stage(2, "Finding decision makers via Prospeo");
+async function getAuthToken(): Promise<string> {
+  const response = await axios.post(
+    `${BASE_URL}/createAuthToken/`,
+    {
+      clientId: process.env.EAZYREACH_CLIENT_ID,
+      clientSecret: process.env.EAZYREACH_CLIENT_SECRET,
+    },
+    {
+      headers: { "Content-Type": "application/json" },
+    },
+  );
+  return response.data.auth_token;
+}
 
-  const allDecisionMakers: DecisionMaker[] = [];
+export async function resolveEmails(
+  decisionMakers: DecisionMaker[],
+): Promise<Contact[]> {
+  logger.stage(3, "Resolving work emails via Eazyreach");
 
-  for (const company of companies) {
+  let authToken: string;
+  try {
+    authToken = await getAuthToken();
+    logger.success("Eazyreach auth token obtained");
+  } catch (error: any) {
+    logger.error(`Eazyreach auth failed: ${error.message}`);
+    return [];
+  }
+
+  const contacts: Contact[] = [];
+  const seenEmails = new Set<string>();
+
+  for (const person of decisionMakers) {
+    if (!person.linkedinUrl) {
+      logger.warn(`No LinkedIn URL for ${person.firstName} — skipping`);
+      continue;
+    }
+
     try {
-      logger.info(`Searching decision makers for: ${company.domain}`);
+      logger.info(
+        `Resolving email for: ${person.firstName} ${person.lastName}`,
+      );
 
       const response = await axios.post(
-        `${BASE_URL}/domain-search`,
-        {
-          domain: company.domain,
-          limit: 5,
-        },
+        `${BASE_URL}/linkedin-emails`,
+        { linkedinUrl: person.linkedinUrl },
         {
           headers: {
-            "X-KEY": process.env.PROSPEO_API_KEY,
+            Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json",
           },
         },
       );
 
-      const makers: DecisionMaker[] = response.data.response
-        .filter((p: any) =>
-          ["c-suite", "vp", "director", "head"].some((role) =>
-            p.job_title?.toLowerCase().includes(role),
-          ),
-        )
-        .map((p: any) => ({
-          firstName: p.first_name,
-          lastName: p.last_name,
-          title: p.job_title,
-          linkedinUrl: p.linkedin_url,
-          companyDomain: company.domain,
-        }));
-
-      logger.success(
-        `Found ${makers.length} decision makers at ${company.domain}`,
+      const emails: any[] = response.data.emails || [];
+      const verified = emails.filter(
+        (e) => e.verification === "verified" || e.verification === "probable",
       );
-      allDecisionMakers.push(...makers);
 
-      // avoid rate limiting
-      await new Promise((r) => setTimeout(r, 1000));
-    } catch (error: any) {
-      if (error.response?.status === 429) {
-        logger.warn(`Rate limit hit for ${company.domain} — skipping`);
+      if (verified.length === 0) {
+        logger.warn(`No verified email for ${person.firstName}`);
         continue;
       }
-      logger.error(`Prospeo failed for ${company.domain}: ${error.message}`);
+
+      const email = verified[0].email;
+
+      if (seenEmails.has(email)) {
+        logger.warn(`Duplicate skipped: ${email}`);
+        continue;
+      }
+
+      seenEmails.add(email);
+      contacts.push({
+        firstName: person.firstName,
+        lastName: person.lastName,
+        title: person.title,
+        email,
+        companyDomain: person.companyDomain,
+      });
+
+      logger.success(`Resolved: ${email}`);
+      await new Promise((r) => setTimeout(r, 1000));
+    } catch (error: any) {
+      if (error.response?.status === 402) {
+        logger.warn(`Insufficient credits — skipping ${person.firstName}`);
+        continue;
+      }
+      if (error.response?.status === 429) {
+        logger.warn(`Rate limit — waiting 5s...`);
+        await new Promise((r) => setTimeout(r, 5000));
+        continue;
+      }
+      logger.error(
+        `Eazyreach failed for ${person.firstName}: ${error.message}`,
+      );
     }
   }
 
-  logger.success(`Total decision makers found: ${allDecisionMakers.length}`);
-  return allDecisionMakers;
+  logger.success(`Total verified contacts: ${contacts.length}`);
+  return contacts;
 }
