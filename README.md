@@ -27,7 +27,8 @@ vocallabs.ai → Ocean.io (10 lookalike companies) → Prospeo (C-suite + Linked
 
 ## Architecture
 
-<img width="1520" height="889" alt="outreach_pipeline_architecture" src="https://github.com/user-attachments/assets/f83b42e5-282d-47da-b795-d51853b45f35" />
+<img width="1520" height="887" alt="outreach_pipeline_archeteture" src="https://github.com/user-attachments/assets/44400a33-f2b3-45ed-939b-7a365b74b5ba" />
+
 
 The pipeline runs four stages sequentially:
 
