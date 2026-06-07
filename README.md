@@ -4,9 +4,9 @@ One domain in. Personalized cold outreach out. Zero manual steps in between.
 
 ## Overview
 
-This repository contains a TypeScript cold outreach pipeline that runs four provider-specific stages in sequence. The pipeline is designed for deterministic execution, explicit safety review, and integration with Ocean.io, Prospeo, Eazyreach, and Brevo.
+This repository contains a TypeScript cold outreach pipeline that runs four stages in sequence. The pipeline is designed for deterministic execution, explicit safety review, and clean integration with Ocean.io, Prospeo, and Brevo.
 
-The implementation separates stage logic from orchestration and utility code, making the pipeline easier to extend and maintain.
+The implementation separates stage logic from orchestration and utility code, making the pipeline easy to extend and maintain.
 
 ## How it works
 
@@ -16,7 +16,7 @@ npm start vocallabs.ai
 
 Simple flow:
 
-vocallabs.ai → Ocean.io (10 lookalike companies) → Prospeo (C-suite + LinkedIn URLs) → Eazyreach (verified emails) → Safety Checkpoint (review before send) → Brevo (personalized emails sent)
+vocallabs.ai → Ocean.io (10 lookalike companies) → Prospeo (C-suite + LinkedIn URLs + verified emails) → Safety Checkpoint (review before send) → Brevo (personalized emails sent)
 
 ## Features
 
@@ -32,8 +32,8 @@ vocallabs.ai → Ocean.io (10 lookalike companies) → Prospeo (C-suite + Linked
 The pipeline runs four stages sequentially:
 
 - Stage 1 — Ocean.io finds lookalike companies from the seed domain
-- Stage 2 — Prospeo surfaces C-suite and VP level decision makers with LinkedIn URLs
-- Stage 3 — Eazyreach resolves each LinkedIn profile into a verified work email
+- Stage 2 — Prospeo surfaces C-suite and VP level decision makers with LinkedIn URLs and verified emails
+- Stage 3 — Prospeo verified emails are extracted and deduplicated
 - Stage 4 — Brevo sends a personalized outreach email to every verified contact
 
 A safety checkpoint between Stage 3 and Stage 4 shows all contacts and requires explicit confirmation before any email is sent.
@@ -62,14 +62,12 @@ cp .env.example .env
 
 Required environment variables:
 
-| Variable                  | Description                                      |
-| ------------------------- | ------------------------------------------------ |
-| `OCEAN_API_KEY`           | Ocean.io API key for company discovery           |
-| `PROSPEO_API_KEY`         | Prospeo API key for executive contact enrichment |
-| `EAZYREACH_CLIENT_ID`     | Eazyreach client identifier for email resolution |
-| `EAZYREACH_CLIENT_SECRET` | Eazyreach client secret for email resolution     |
-| `BREVO_API_KEY`           | Brevo API key for outbound email delivery        |
-| `SENDER_EMAIL`            | Verified sender email address used by Brevo      |
+| Variable          | Description                                             |
+| ----------------- | ------------------------------------------------------- |
+| `OCEAN_API_KEY`   | Ocean.io API key for company discovery                  |
+| `PROSPEO_API_KEY` | Prospeo API key for decision maker and email enrichment |
+| `BREVO_API_KEY`   | Brevo API key for outbound email delivery               |
+| `SENDER_EMAIL`    | Verified sender email address used by Brevo             |
 
 ### Local development
 
@@ -107,11 +105,12 @@ docker compose run pipeline npm start vocallabs.ai
 Before any email fires, the pipeline prints every contact and asks for confirmation:
 
 ```
-## ==================================================
+==================================================
 SAFETY CHECKPOINT — Review before sending
+==================================================
 
 1. John Smith (CEO)
-[john@stripe.com](mailto:john@stripe.com) — stripe.com
+   john@stripe.com — stripe.com
 
 Send emails? (yes/no):
 ```
@@ -122,10 +121,10 @@ Type `yes` to send. Anything else exits with zero emails sent.
 
 - `src/index.ts` — orchestrates all 4 stages sequentially
 - `src/types.ts` — TypeScript interfaces: Company, DecisionMaker, Contact
-- `src/stages/ocean.ts` — Stage 1: finds lookalike companies
-- `src/stages/prospeo.ts` — Stage 2: finds decision makers
-- `src/stages/eazyreach.ts` — Stage 3: resolves verified emails
-- `src/stages/brevo.ts` — Stage 4: sends outreach emails
+- `src/stages/ocean.ts` — Stage 1: finds lookalike companies via Ocean.io
+- `src/stages/prospeo.ts` — Stage 2: finds decision makers and emails via Prospeo
+- `src/stages/eazyreach.ts` — Stage 3: extracts and deduplicates verified emails
+- `src/stages/brevo.ts` — Stage 4: sends personalized outreach emails via Brevo
 - `src/utils/checkpoint.ts` — safety confirmation before send
 - `src/utils/logger.ts` — colored terminal output
 
