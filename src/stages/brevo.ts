@@ -4,26 +4,31 @@ import { logger } from "../utils/logger";
 
 const BASE_URL = "https://api.brevo.com/v3";
 
+function companyName(domain: string): string {
+  return domain
+    .replace(/^www\./, "")
+    .replace(/\.(com|ai|io|co|net|org|in).*$/, "")
+    .split(/[-_]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 function buildEmailBody(contact: Contact): string {
+  const company = companyName(contact.companyDomain);
   return `Hi ${contact.firstName},
 
-I noticed ${contact.companyDomain} and thought there might be a genuine fit worth exploring.
+I came across ${company} while researching high-growth teams in the AI space — looks like you're building something interesting.
 
-We help companies like yours automate their sales outreach — from finding the right decision-makers to sending personalized emails at scale, all without manual effort.
+I'm reaching out because we built an outreach system that does in seconds what most sales teams spend hours on each week — finding decision-makers, verifying emails, and sending personalized messages, fully automated.
 
-Most teams we work with were spending hours each week on prospecting. We cut that to zero.
+Given your role as ${contact.title} at ${company}, I thought this could directly impact how your team handles prospecting.
 
-Here's what we do in short:
-- Identify lookalike companies from your best customers
-- Surface C-suite and VP-level contacts automatically
-- Verify work emails so nothing bounces
-- Send personalized outreach on your behalf
-
-Would it make sense to hop on a quick 15-minute call this week to see if this could work for ${contact.companyDomain}?
+Would you be open to a 15-minute call this week? Happy to show you a live demo.
 
 Best,
 Surya Parua
-Vocallabs / SubSpace Growth Team`;
+Vocallabs / SubSpace
+surya.exce@gmail.com`;
 }
 
 export async function sendOutreachEmails(contacts: Contact[]): Promise<number> {
@@ -46,7 +51,7 @@ export async function sendOutreachEmails(contacts: Contact[]): Promise<number> {
               name: `${contact.firstName} ${contact.lastName}`,
             },
           ],
-          subject: `Quick note — ${contact.companyDomain}`,
+          subject: `Quick question for you, ${contact.firstName}`,
           textContent: buildEmailBody(contact),
         },
         {
