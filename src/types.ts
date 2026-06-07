@@ -10,6 +10,7 @@ export interface DecisionMaker {
   linkedinUrl: string;
   companyDomain: string;
   personId?: string;
+  email?: string;
 }
 
 export interface Contact {

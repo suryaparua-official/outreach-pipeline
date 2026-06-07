@@ -60,6 +60,7 @@ export async function findDecisionMakers(
             linkedinUrl: p?.linkedin_url || "",
             companyDomain: company.domain,
             personId: p?.person_id || "",
+            email: p?.email?.email || "",
           };
         })
         .filter((m: any) => m.firstName && m.linkedinUrl);
