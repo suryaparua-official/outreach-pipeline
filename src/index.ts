@@ -12,8 +12,6 @@ function validateEnv() {
   const requiredKeys = [
     "OCEAN_API_KEY",
     "PROSPEO_API_KEY",
-    "EAZYREACH_CLIENT_ID",
-    "EAZYREACH_CLIENT_SECRET",
     "BREVO_API_KEY",
     "SENDER_EMAIL",
   ];
