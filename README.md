@@ -18,6 +18,13 @@ Simple flow:
 
 vocallabs.ai → Ocean.io (10 lookalike companies) → Prospeo (C-suite + LinkedIn URLs + verified emails) → Safety Checkpoint (review before send) → Brevo (personalized emails sent)
 
+<img width="1717" height="916" alt="Terminal" src="https://github.com/user-attachments/assets/3087edcf-d098-4d6c-8864-a1c0bf164cea" />
+
+<img width="1170" height="502" alt="Screenshot 2026-06-07 175836" src="https://github.com/user-attachments/assets/e5a5e9e5-8b62-4097-af0f-d36b460a7708" />
+
+<img width="1151" height="677" alt="Screenshot 2026-06-07 175854" src="https://github.com/user-attachments/assets/4fbd2cd9-b0cf-4093-922c-c5d5bb98ea6b" />
+
+
 ## Features
 
 - Four-stage outreach pipeline with explicit handoff between providers
